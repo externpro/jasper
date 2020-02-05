@@ -1,21 +1,5 @@
 set(lib_name libjasper)
 #######################################
-# preprocessor
-if(MSVC)
-  add_definitions(
-    -D_CRT_NONSTDC_NO_DEPRECATE
-    -D_CRT_SECURE_NO_WARNINGS
-    )
-endif()
-#######################################
-# include directories
-include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
-#######################################
-# library sources
-###################
-# base
 set(base_srcs
   base/jas_cm.c
   base/jas_debug.c
@@ -35,7 +19,6 @@ set(base_srcs
 source_group(base FILES ${base_srcs})
 list(APPEND ${lib_name}_libsrcs ${base_srcs})
 ###################
-# bmp
 set(bmp_srcs
   bmp/bmp_cod.c
   bmp/bmp_cod.h
@@ -46,7 +29,6 @@ set(bmp_srcs
 source_group(bmp FILES ${bmp_srcs})
 list(APPEND ${lib_name}_libsrcs ${bmp_srcs})
 ###################
-# include
 set(include_srcs
   include/jasper/jas_cm.h
   include/jasper/jas_config2.h
@@ -71,7 +53,6 @@ set(include_srcs
 source_group(include FILES ${include_srcs})
 list(APPEND ${lib_name}_libsrcs ${include_srcs})
 ###################
-# jp2
 set(jp2_srcs
   jp2/jp2_cod.c
   jp2/jp2_cod.h
@@ -82,7 +63,6 @@ set(jp2_srcs
 source_group(jp2 FILES ${jp2_srcs})
 list(APPEND ${lib_name}_libsrcs ${jp2_srcs})
 ###################
-# jpc
 set(jpc_srcs
   jpc/jpc_bs.c
   jpc/jpc_bs.h
@@ -129,7 +109,6 @@ set(jpc_srcs
 source_group(jpc FILES ${jpc_srcs})
 list(APPEND ${lib_name}_libsrcs ${jpc_srcs})
 ###################
-# jpg
 set(jpg_srcs
   jpg/jpg_cod.h
   jpg/jpg_dummy.c
@@ -138,7 +117,6 @@ set(jpg_srcs
 source_group(jpg FILES ${jpg_srcs})
 list(APPEND ${lib_name}_libsrcs ${jpg_srcs})
 ###################
-# mif
 set(mif_srcs
   mif/mif_cod.c
   mif/mif_cod.h
@@ -146,7 +124,6 @@ set(mif_srcs
 source_group(mif FILES ${mif_srcs})
 list(APPEND ${lib_name}_libsrcs ${mif_srcs})
 ###################
-# pgx
 set(pgx_srcs
   pgx/pgx_cod.c
   pgx/pgx_cod.h
@@ -157,7 +134,6 @@ set(pgx_srcs
 source_group(pgx FILES ${pgx_srcs})
 list(APPEND ${lib_name}_libsrcs ${pgx_srcs})
 ###################
-# pnm
 set(pnm_srcs
   pnm/pnm_cod.c
   pnm/pnm_cod.h
@@ -168,7 +144,6 @@ set(pnm_srcs
 source_group(pnm FILES ${pnm_srcs})
 list(APPEND ${lib_name}_libsrcs ${pnm_srcs})
 ###################
-# ras
 set(ras_srcs
   ras/ras_cod.c
   ras/ras_cod.h
@@ -179,7 +154,6 @@ set(ras_srcs
 source_group(ras FILES ${ras_srcs})
 list(APPEND ${lib_name}_libsrcs ${ras_srcs})
 #######################################
-# version
 if(NOT DEFINED JASPER_VER)
   set(JASPER_VER ${JAS_VERSION})
 elseif(NOT ${JASPER_VER} STREQUAL ${JAS_VERSION})
@@ -188,14 +162,18 @@ endif()
 set(ver _${JASPER_VER})
 set(verDir /${PROJECT_NAME}${ver})
 #######################################
-# library
 add_library(${lib_name} STATIC ${${lib_name}_libsrcs})
+target_include_directories(${lib_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include${verDir}>
+  )
+if(MSVC)
+  target_compile_definitions(${lib_name} PRIVATE -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS)
+endif()
 set_target_properties(${lib_name} PROPERTIES
   OUTPUT_NAME ${lib_name}${ver}
   PREFIX "" # strip off the "lib" prefix, since it's already libjasper
   )
 #######################################
-# install
 set(targetsFile ${PROJECT_NAME}${ver}-targets)
 install(TARGETS ${lib_name} EXPORT ${targetsFile}
   RUNTIME DESTINATION bin
@@ -203,4 +181,7 @@ install(TARGETS ${lib_name} EXPORT ${targetsFile}
   ARCHIVE DESTINATION lib
   )
 install(FILES ${include_srcs} DESTINATION include${verDir}/${PROJECT_NAME})
-install(EXPORT ${targetsFile} DESTINATION lib/cmake)
+if(DEFINED XP_NAMESPACE)
+  set(nameSpace NAMESPACE ${XP_NAMESPACE}::)
+endif()
+install(EXPORT ${targetsFile} DESTINATION lib/cmake ${nameSpace})
