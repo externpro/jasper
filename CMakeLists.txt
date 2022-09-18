@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(jasper)
+include(GNUInstallDirs)
 include(flags OPTIONAL)
 include(configure.cmake)
 add_subdirectory(src/libjasper)

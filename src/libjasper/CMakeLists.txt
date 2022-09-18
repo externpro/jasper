@@ -154,34 +154,27 @@ set(ras_srcs
 source_group(ras FILES ${ras_srcs})
 list(APPEND ${lib_name}_libsrcs ${ras_srcs})
 #######################################
-if(NOT DEFINED JASPER_VER)
-  set(JASPER_VER ${JAS_VERSION})
-elseif(NOT ${JASPER_VER} STREQUAL ${JAS_VERSION})
-  message(AUTHOR_WARNING "version passed in (${JASPER_VER}) doesn't match version from configure.cmake (${JAS_VERSION})")
-endif()
-set(ver _${JASPER_VER})
-set(verDir /${PROJECT_NAME}${ver})
-#######################################
 add_library(${lib_name} STATIC ${${lib_name}_libsrcs})
 target_include_directories(${lib_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include${verDir}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
 if(MSVC)
   target_compile_definitions(${lib_name} PRIVATE -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS)
 endif()
-set_target_properties(${lib_name} PROPERTIES
-  OUTPUT_NAME ${lib_name}${ver}
-  PREFIX "" # strip off the "lib" prefix, since it's already libjasper
-  )
+# strip off the "lib" prefix, since it's already libjasper
+set_target_properties(${lib_name} PROPERTIES PREFIX "")
 #######################################
-set(targetsFile ${PROJECT_NAME}${ver}-targets)
+set(targetsFile ${PROJECT_NAME}-targets)
 install(TARGETS ${lib_name} EXPORT ${targetsFile}
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   )
-install(FILES ${include_srcs} DESTINATION include${verDir}/${PROJECT_NAME})
+install(FILES ${include_srcs} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 if(DEFINED XP_NAMESPACE)
   set(nameSpace NAMESPACE ${XP_NAMESPACE}::)
 endif()
-install(EXPORT ${targetsFile} DESTINATION lib/cmake ${nameSpace})
+if(NOT DEFINED XP_INSTALL_CMAKEDIR)
+  set(XP_INSTALL_CMAKEDIR ${CMAKE_INSTALL_DATADIR}/cmake)
+endif()
+install(EXPORT ${targetsFile} DESTINATION ${XP_INSTALL_CMAKEDIR} ${nameSpace})
