@@ -1,5 +1,5 @@
 set(exes imgcmp jasper)
 foreach(exe ${exes})
   add_executable(${exe} ${exe}.c)
-  target_link_libraries(${exe} libjasper ${JAS_SYSTEM_LIBS})
+  target_link_libraries(${exe} libjasper)
 endforeach()
