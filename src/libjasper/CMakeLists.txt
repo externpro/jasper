@@ -156,8 +156,11 @@ list(APPEND ${lib_name}_libsrcs ${ras_srcs})
 #######################################
 add_library(${lib_name} STATIC ${${lib_name}_libsrcs})
 target_include_directories(${lib_name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}> # for jasper/jas_config.h
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
   )
+# NOTE: XP_SYSTEM_LIBS populated by configure.cmake xpcfgCheckLibraryExists()
+target_link_libraries(${lib_name} PRIVATE ${XP_SYSTEM_LIBS})
 if(MSVC)
   target_compile_definitions(${lib_name} PRIVATE -D_CRT_NONSTDC_NO_DEPRECATE -D_CRT_SECURE_NO_WARNINGS)
 endif()
